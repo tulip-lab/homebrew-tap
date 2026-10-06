@@ -1,0 +1,34 @@
+name: Formula CI
+
+on:
+  push:
+    paths:
+      - "Formula/**"
+      - ".github/workflows/formula.yml"
+  pull_request:
+    paths:
+      - "Formula/**"
+      - ".github/workflows/formula.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-15
+          - macos-15-intel
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Tap this checkout
+        run: brew tap tulip-lab/tap "${GITHUB_WORKSPACE}"
+      - name: Audit formula
+        run: brew audit --strict tulip-lab/tap/spacewright
+      - name: Install formula
+        run: brew install --build-from-source tulip-lab/tap/spacewright
+      - name: Test formula
+        run: brew test tulip-lab/tap/spacewright
