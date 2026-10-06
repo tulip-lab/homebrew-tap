@@ -24,11 +24,18 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
+      - name: Detect published formula
+        id: formula
+        run: echo "present=$([[ -f Formula/spacewright.rb ]] && echo true || echo false)" >> "${GITHUB_OUTPUT}"
       - name: Tap this checkout
+        if: steps.formula.outputs.present == 'true'
         run: brew tap tulip-lab/tap "${GITHUB_WORKSPACE}"
       - name: Audit formula
+        if: steps.formula.outputs.present == 'true'
         run: brew audit --strict tulip-lab/tap/spacewright
       - name: Install formula
+        if: steps.formula.outputs.present == 'true'
         run: brew install --build-from-source tulip-lab/tap/spacewright
       - name: Test formula
+        if: steps.formula.outputs.present == 'true'
         run: brew test tulip-lab/tap/spacewright
